@@ -116,7 +116,9 @@ class Game {
 
     for (let i = 0; i < this.getRowCount(); i++) {
       for (let j = 0; j < this.getColCount(); j++) {
-        this._cells.push(new __WEBPACK_IMPORTED_MODULE_0__cell__["a" /* Cell */](j * w, i * w, w, mineLocations.indexOf(this._getIndex(i, j)) > -1));
+        let isMined = mineLocations.indexOf(this._getIndex(i, j)) > -1;
+
+        this._cells.push(new __WEBPACK_IMPORTED_MODULE_0__cell__["a" /* Cell */](j * w, i * w, w, isMined));
       }
     }
 
@@ -125,11 +127,11 @@ class Game {
     });
 
     this._cells.forEach(cell => {
-      cell.setNeighbours(this._getNeighbours(cell));
+      cell.setNeighbours(this._findNeighbours(cell));
     });
   }
 
-  _getNeighbours(cell) {
+  _findNeighbours(cell) {
     const neighbours = [];
 
     for (let rowDelta = -1; rowDelta < 2; rowDelta++) {
@@ -152,7 +154,7 @@ class Game {
   }
 
   _countMinesAround(cell) {
-    return this._getNeighbours(cell).reduce(function (count, cell) {
+    return this._findNeighbours(cell).reduce(function (count, cell) {
       const number = cell.isMine() ? 1 : 0;
       return number + count;
     }, 0);
