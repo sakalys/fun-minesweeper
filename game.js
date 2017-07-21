@@ -5,25 +5,6 @@ var cells = [],
     w = 40;
 
 
-function mix(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-}
-
 
 function setup() {
     createCanvas(601, 401);
@@ -39,7 +20,7 @@ function setup() {
     }
 
 
-    var randomNumbers = mix(incrementingArray);
+    var randomNumbers = shuffle(incrementingArray);
 
     randomNumbers.splice(mineCount);
 
@@ -50,34 +31,6 @@ function setup() {
     }
 }
 
-function Cell(x, y, w, mine) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.revealed = false;
-    this.mine = mine;
-
-    if (this.mine) {
-        console.log(mine);
-    }
-}
-
-Cell.prototype.draw = function () {
-    fill(this.revealed ? 215 : 245);
-    this.revealed ? stroke(90) : stroke(200);
-    rect(this.x, this.y, this.w, this.w);
-
-    if (this.revealed && this.mine) {
-        fill(200, 30, 40);
-        var half = this.w /2;
-
-        ellipse(this.x + half, this.y + half, half, half);
-    }
-};
-
-Cell.prototype.reveal = function () {
-    this.revealed = true;
-};
 
 function draw() {
 
