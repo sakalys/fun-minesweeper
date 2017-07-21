@@ -8,7 +8,19 @@ export class Game {
 
     this._cellWidth = 40;
     this._cells = [];
-    this._booted = false;
+    this._isStarted = false;
+  }
+
+  _firstCellClicked(cell) {
+    const mineLocations = this._makeMineLocations(cell);
+
+    mineLocations.forEach((index) => {
+      this._cells[index].mine();
+    });
+
+    this._cells.forEach((cell) => {
+      cell.setMinesAround(this._countMinesAround(cell));
+    });
   }
 
   boot() {
@@ -17,30 +29,25 @@ export class Game {
     createCanvas(601, 401);
     background(0, 0, 0);
 
-    const mineLocations = this._makeMineLocations(),
-      w = this.getCellWidth();
+    const w = this.getCellWidth();
 
     for (let i = 0; i < this.getRowCount(); i++) {
       for (let j = 0; j < this.getColCount(); j++) {
-        let isMined = mineLocations.indexOf(this._getIndex(i, j)) > -1;
-
-        this._cells.push(new Cell(j * w, i * w, w, isMined));
+        this._cells.push(new Cell(j * w, i * w, w));
       }
     }
 
     this._cells.forEach((cell) => {
-      cell.setMinesAround(this._countMinesAround(cell));
-    });
-
-    this._cells.forEach((cell) => {
       cell.setNeighbours(this._findNeighbours(cell));
     });
-
-    this._booted = true;
   }
 
-  isBooted() {
-    return this._booted;
+  /**
+   * Has the first cell been revealed
+   * @returns {boolean}
+   */
+  isStarted() {
+    return this._isStarted;
   }
 
   _findNeighbours(cell) {
@@ -115,12 +122,23 @@ export class Game {
     return this._mineCount
   }
 
-  _makeMineLocations() {
+  _makeMineLocations(cell) {
+
+    const notMined = [];
+
+    notMined.push(this._cells.indexOf(cell));
+    cell.getNeighbours().forEach((c) => {
+      notMined.push(this._cells.indexOf(c));
+    });
 
     const incrementingArray = [];
     for (let nr = 0; nr < this.getRowCount() * this.getColCount(); nr++) {
       incrementingArray.push(nr);
     }
+
+    notMined.forEach((i) => {
+      incrementingArray.splice(incrementingArray.indexOf(i), 1);
+    });
 
     //noinspection JSUnresolvedFunction
     const randomNumbers = shuffle(incrementingArray);
@@ -152,6 +170,11 @@ export class Game {
 
     if (!cell) {
       return;
+    }
+
+    if (!this.isStarted()) {
+      this._firstCellClicked(cell);
+      this._isStarted = true;
     }
 
     this._fullReveal(cell);

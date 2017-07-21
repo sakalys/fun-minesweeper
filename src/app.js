@@ -3,7 +3,7 @@ import {Game} from "./game";
 let game;
 
 function newGame() {
-  game = new Game(10, 15, 20);
+  game = new Game(10, 15, 30);
   game.boot();
 }
 

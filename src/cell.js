@@ -1,12 +1,16 @@
 export class Cell {
 
-  constructor(x, y, w, mine) {
+  constructor(x, y, w) {
     this._x = x;
     this._y = y;
     this._w = w;
-    this._mine = mine;
+    this._mined = false;
     this._revealed = false;
     this._minesAround = 0;
+  }
+
+  mine() {
+    this._mined = true;
   }
 
   get x() {
@@ -24,7 +28,7 @@ export class Cell {
 
     if (this._revealed) {
 
-      if (this._mine) {
+      if (this._mined) {
         fill(200, 30, 40);
         let half = this._w / 2;
 
@@ -55,7 +59,7 @@ export class Cell {
   reveal() {
     this._revealed = true;
 
-    return !this._mine;
+    return !this._mined;
   }
 
   isRevealed() {
@@ -67,7 +71,7 @@ export class Cell {
   }
 
   isMine() {
-    return this._mine;
+    return this._mined;
   }
 }
 
