@@ -1,11 +1,12 @@
+var Cell = require('./cell');
+
 var cells = [],
     rows = 10,
     cols = 15,
     mineCount = 20,
     w = 40;
 
-
-function setup() {
+window.setup = function() {
     //noinspection JSUnresolvedFunction
     createCanvas(601, 401);
     background(0, 0, 0);
@@ -25,7 +26,7 @@ function setup() {
     cells.forEach(function (cell) {
         cell.setNeighbours(getNeighbours(cell));
     });
-}
+};
 
 function makeMineLocations(rows, cols, howMany) {
 
@@ -43,15 +44,15 @@ function makeMineLocations(rows, cols, howMany) {
 }
 
 
-function draw() {
+window.draw = function() {
 
     cells.forEach(function (cell) {
         cell.draw();
     });
 
-}
+};
 
-function mouseClicked() {
+window.mouseClicked = function() {
     //noinspection JSUnresolvedVariable
     var row = (mouseY - (mouseY % w)) / w;
     //noinspection JSUnresolvedVariable

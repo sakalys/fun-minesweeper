@@ -1,0 +1,8 @@
+{
+  "name": "fun-minesweeper",
+  "version": "0.0.1",
+  "description": "",
+  "devDependencies": {
+    "webpack": "^3.3.0"
+  }
+}

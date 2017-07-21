@@ -1,3 +1,5 @@
+module.exports = Cell;
+
 function Cell(x, y, w, mine) {
     this.x = x;
     this.y = y;
