@@ -67,20 +67,18 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Game = __webpack_require__(2);
+var Game = __webpack_require__(1);
 
 var game,
-  rows = 10,
-  cols = 15,
-  mineCount = 20,
-  w = 40;
-
+    rows = 10,
+    cols = 15,
+    mineCount = 20,
+    w = 40;
 
 window.setup = function () {
   game = new Game(rows, cols, w, mineCount);
   game.start();
 };
-
 
 window.draw = function () {
   game.draw();
@@ -91,77 +89,11 @@ window.mouseClicked = function () {
   game.handleClick(mouseX, mouseY);
 };
 
-
-
-
-
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
-
-module.exports = Cell;
-
-function Cell(x, y, w, mine) {
-  this.x = x;
-  this.y = y;
-  this.w = w;
-  this.revealed = false;
-  this.mine = mine;
-  this.minesAround = 0;
-}
-
-Cell.prototype.draw = function () {
-  fill(this.revealed ? 215 : 245);
-  this.revealed ? stroke(140) : stroke(200);
-  rect(this.x, this.y, this.w, this.w);
-
-  if (this.revealed) {
-
-    if (this.mine) {
-      fill(200, 30, 40);
-      var half = this.w / 2;
-
-      ellipse(this.x + half, this.y + half, half, half);
-
-    } else if (this.minesAround) {
-      textAlign(CENTER);
-      fill(100, 90, 190);
-      textSize(20);
-      text(this.minesAround, this.x + 3, this.y + this.w / 2 - 11, this.w, this.w);
-    }
-
-  }
-};
-
-Cell.prototype.setNeighbours = function (arr) {
-  this.neighbours = arr;
-};
-
-Cell.prototype.getNeighbours = function () {
-  return this.neighbours;
-};
-
-Cell.prototype.reveal = function () {
-  this.revealed = true;
-
-  return !this.mine;
-};
-
-Cell.prototype.setMinesAround = function (count) {
-  this.minesAround = count;
-};
-
-Cell.prototype.isMine = function () {
-  return this.mine;
-};
-
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Cell = __webpack_require__(1);
+var Cell = __webpack_require__(2);
 
 module.exports = Game;
 
@@ -181,7 +113,7 @@ Game.prototype.start = function () {
   background(0, 0, 0);
 
   var mineLocations = this._makeMineLocations(),
-    w = this.getCellWidth();
+      w = this.getCellWidth();
 
   for (var i = 0; i < this.getRowCount(); i++) {
     for (var j = 0; j < this.getColCount(); j++) {
@@ -202,14 +134,14 @@ Game.prototype._getNeighbours = function (cell) {
   var neighbours = [];
 
   for (var rowDelta = -1; rowDelta < 2; rowDelta++) {
-    var row = rowDelta + (cell.y / cell.w);
+    var row = rowDelta + cell.y / cell.w;
     if (row < 0 || row >= this.getRowCount()) {
       continue;
     }
 
     for (var colDelta = -1; colDelta < 2; colDelta++) {
-      var col = colDelta + (cell.x / cell.w);
-      if (col < 0 || col >= this.getColCount() || (rowDelta === 0 && colDelta === 0)) {
+      var col = colDelta + cell.x / cell.w;
+      if (col < 0 || col >= this.getColCount() || rowDelta === 0 && colDelta === 0) {
         continue;
       }
 
@@ -218,7 +150,6 @@ Game.prototype._getNeighbours = function (cell) {
   }
 
   return neighbours;
-
 };
 
 Game.prototype._countMinesAround = function (cell) {
@@ -226,7 +157,6 @@ Game.prototype._countMinesAround = function (cell) {
     var number = cell.isMine() ? 1 : 0;
     return number + count;
   }, 0);
-
 };
 
 Game.prototype._getCell = function (row, col) {
@@ -239,10 +169,9 @@ Game.prototype._getCell = function (row, col) {
   return this._cells[index];
 };
 
-
 Game.prototype._getIndex = function (row, col) {
   var rows = this.getRowCount(),
-    cols = this.getColCount();
+      cols = this.getColCount();
 
   if (row >= rows || col >= cols) {
     return null;
@@ -264,7 +193,7 @@ Game.prototype.getCellWidth = function () {
 };
 
 Game.prototype.getMineCount = function () {
-  return this._mineCount
+  return this._mineCount;
 };
 
 Game.prototype._makeMineLocations = function () {
@@ -299,8 +228,8 @@ Game.prototype.handleClick = function (x, y) {
 
   var w = this.getCellWidth();
 
-  var row = (y - (y % w)) / w,
-    col = (x - (x % w)) / w;
+  var row = (y - y % w) / w,
+      col = (x - x % w) / w;
 
   var cell = this._getCell(row, col);
 
@@ -339,6 +268,63 @@ Game.prototype._fullReveal = function (cell) {
   });
 };
 
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = Cell;
+
+function Cell(x, y, w, mine) {
+  this.x = x;
+  this.y = y;
+  this.w = w;
+  this.revealed = false;
+  this.mine = mine;
+  this.minesAround = 0;
+}
+
+Cell.prototype.draw = function () {
+  fill(this.revealed ? 215 : 245);
+  this.revealed ? stroke(140) : stroke(200);
+  rect(this.x, this.y, this.w, this.w);
+
+  if (this.revealed) {
+
+    if (this.mine) {
+      fill(200, 30, 40);
+      var half = this.w / 2;
+
+      ellipse(this.x + half, this.y + half, half, half);
+    } else if (this.minesAround) {
+      textAlign(CENTER);
+      fill(100, 90, 190);
+      textSize(20);
+      text(this.minesAround, this.x + 3, this.y + this.w / 2 - 11, this.w, this.w);
+    }
+  }
+};
+
+Cell.prototype.setNeighbours = function (arr) {
+  this.neighbours = arr;
+};
+
+Cell.prototype.getNeighbours = function () {
+  return this.neighbours;
+};
+
+Cell.prototype.reveal = function () {
+  this.revealed = true;
+
+  return !this.mine;
+};
+
+Cell.prototype.setMinesAround = function (count) {
+  this.minesAround = count;
+};
+
+Cell.prototype.isMine = function () {
+  return this.mine;
+};
 
 /***/ })
 /******/ ]);
