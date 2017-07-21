@@ -76,7 +76,7 @@ let game;
 
 function newGame() {
   game = new __WEBPACK_IMPORTED_MODULE_0__game__["a" /* Game */](10, 15, 20);
-  game.start();
+  game.boot();
 }
 
 window.newGame = newGame;
@@ -106,12 +106,14 @@ class Game {
   constructor(rows, cols, mineCount) {
     this._rows = rows;
     this._cols = cols;
-    this._cellWidth = 40;
     this._mineCount = mineCount;
+
+    this._cellWidth = 40;
     this._cells = [];
+    this._booted = false;
   }
 
-  start() {
+  boot() {
 
     //noinspection JSUnresolvedFunction
     createCanvas(601, 401);
@@ -135,19 +137,29 @@ class Game {
     this._cells.forEach(cell => {
       cell.setNeighbours(this._findNeighbours(cell));
     });
+
+    this._booted = true;
+  }
+
+  isBooted() {
+    return this._booted;
   }
 
   _findNeighbours(cell) {
     const neighbours = [];
 
     for (let rowDelta = -1; rowDelta < 2; rowDelta++) {
-      const row = rowDelta + cell.y / cell.w;
+      let w = this.getCellWidth();
+      let x = cell.x;
+      let y = cell.y;
+
+      const row = rowDelta + y / w;
       if (row < 0 || row >= this.getRowCount()) {
         continue;
       }
 
       for (let colDelta = -1; colDelta < 2; colDelta++) {
-        const col = colDelta + cell.x / cell.w;
+        const col = colDelta + x / w;
         if (col < 0 || col >= this.getColCount() || rowDelta === 0 && colDelta === 0) {
           continue;
         }
@@ -247,7 +259,7 @@ class Game {
 
   _fullReveal(cell) {
 
-    if (cell.revealed) {
+    if (cell.isRevealed()) {
       return;
     }
 
@@ -255,17 +267,21 @@ class Game {
       return this.gameOver();
     }
 
-    if (cell.minesAround) {
+    if (cell.getMinesAroundCount()) {
       return;
     }
 
     const arr = cell.getNeighbours();
 
     arr.forEach(c => {
-      if (!c.revealed) {
-        if (!c.minesAround) {
+
+      if (!c.isRevealed()) {
+
+        const minesAround = c.getMinesAroundCount();
+
+        if (!minesAround) {
           this._fullReveal(c);
-        } else if (c.minesAround) {
+        } else {
           c.reveal();
         }
       }
@@ -283,55 +299,71 @@ class Game {
 class Cell {
 
   constructor(x, y, w, mine) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.revealed = false;
-    this.mine = mine;
-    this.minesAround = 0;
+    this._x = x;
+    this._y = y;
+    this._w = w;
+    this._mine = mine;
+    this._revealed = false;
+    this._minesAround = 0;
+  }
+
+  get x() {
+    return this._x;
+  }
+
+  get y() {
+    return this._y;
   }
 
   draw() {
-    fill(this.revealed ? 215 : 245);
-    this.revealed ? stroke(140) : stroke(200);
-    rect(this.x, this.y, this.w, this.w);
+    fill(this._revealed ? 215 : 245);
+    this._revealed ? stroke(140) : stroke(200);
+    rect(this._x, this._y, this._w, this._w);
 
-    if (this.revealed) {
+    if (this._revealed) {
 
-      if (this.mine) {
+      if (this._mine) {
         fill(200, 30, 40);
-        let half = this.w / 2;
+        let half = this._w / 2;
 
-        ellipse(this.x + half, this.y + half, half, half);
-      } else if (this.minesAround) {
+        ellipse(this._x + half, this._y + half, half, half);
+      } else if (this._minesAround) {
         textAlign(CENTER);
         fill(100, 90, 190);
         textSize(20);
-        text(this.minesAround, this.x + 3, this.y + this.w / 2 - 11, this.w, this.w);
+        text(this._minesAround, this._x + 3, this._y + this._w / 2 - 11, this._w, this._w);
       }
     }
   }
 
+  getMinesAroundCount() {
+    return this._minesAround;
+  }
+
   setNeighbours(arr) {
-    this.neighbours = arr;
+    this._neighbours = arr;
   }
 
   getNeighbours() {
-    return this.neighbours;
+    return this._neighbours;
   }
 
   reveal() {
-    this.revealed = true;
+    this._revealed = true;
 
-    return !this.mine;
+    return !this._mine;
+  }
+
+  isRevealed() {
+    return this._revealed;
   }
 
   setMinesAround(count) {
-    this.minesAround = count;
+    this._minesAround = count;
   }
 
   isMine() {
-    return this.mine;
+    return this._mine;
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Cell;

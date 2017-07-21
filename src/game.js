@@ -4,12 +4,14 @@ export class Game {
   constructor(rows, cols, mineCount) {
     this._rows = rows;
     this._cols = cols;
-    this._cellWidth = 40;
     this._mineCount = mineCount;
+
+    this._cellWidth = 40;
     this._cells = [];
+    this._booted = false;
   }
 
-  start() {
+  boot() {
 
     //noinspection JSUnresolvedFunction
     createCanvas(601, 401);
@@ -33,19 +35,29 @@ export class Game {
     this._cells.forEach((cell) => {
       cell.setNeighbours(this._findNeighbours(cell));
     });
+
+    this._booted = true;
+  }
+
+  isBooted() {
+    return this._booted;
   }
 
   _findNeighbours(cell) {
     const neighbours = [];
 
     for (let rowDelta = -1; rowDelta < 2; rowDelta++) {
-      const row = rowDelta + (cell.y / cell.w);
+      let w = this.getCellWidth();
+      let x = cell.x;
+      let y = cell.y;
+
+      const row = rowDelta + (y / w);
       if (row < 0 || row >= this.getRowCount()) {
         continue;
       }
 
       for (let colDelta = -1; colDelta < 2; colDelta++) {
-        const col = colDelta + (cell.x / cell.w);
+        const col = colDelta + (x / w);
         if (col < 0 || col >= this.getColCount() || (rowDelta === 0 && colDelta === 0)) {
           continue;
         }
@@ -147,7 +159,7 @@ export class Game {
 
   _fullReveal(cell) {
 
-    if (cell.revealed) {
+    if (cell.isRevealed()) {
       return;
     }
 
@@ -155,20 +167,27 @@ export class Game {
       return this.gameOver();
     }
 
-    if (cell.minesAround) {
+    if (cell.getMinesAroundCount()) {
       return;
     }
 
     const arr = cell.getNeighbours();
 
+
+
     arr.forEach((c) => {
-      if (!c.revealed) {
-        if (!c.minesAround) {
+
+      if (!c.isRevealed()) {
+
+        const minesAround = c.getMinesAroundCount();
+
+        if (!minesAround) {
           this._fullReveal(c);
-        } else if (c.minesAround) {
+        } else {
           c.reveal();
         }
       }
+
     });
   }
 }

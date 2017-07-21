@@ -4,7 +4,7 @@ let game;
 
 function newGame() {
   game = new Game(10, 15, 20);
-  game.start();
+  game.boot();
 }
 
 window.newGame = newGame;
