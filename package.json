@@ -2,6 +2,9 @@
   "name": "fun-minesweeper",
   "version": "0.0.1",
   "description": "",
+  "scripts": {
+    "start": "webpack -w"
+  },
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
