@@ -3,7 +3,7 @@ import {Game} from "./game";
 let game;
 
 window.setup = function () {
-  game = new Game(10, 15, 40, 20);
+  game = new Game(10, 15, 20);
   game.start();
 };
 

@@ -75,7 +75,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 let game;
 
 window.setup = function () {
-  game = new __WEBPACK_IMPORTED_MODULE_0__game__["a" /* Game */](10, 15, 40, 20);
+  game = new __WEBPACK_IMPORTED_MODULE_0__game__["a" /* Game */](10, 15, 20);
   game.start();
 };
 
@@ -97,10 +97,10 @@ window.mouseClicked = function () {
 
 
 class Game {
-  constructor(rows, cols, cellWidth, mineCount) {
+  constructor(rows, cols, mineCount) {
     this._rows = rows;
     this._cols = cols;
-    this._cellWidth = cellWidth;
+    this._cellWidth = 40;
     this._mineCount = mineCount;
     this._cells = [];
   }

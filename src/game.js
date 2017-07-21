@@ -1,10 +1,10 @@
 import {Cell} from "./cell";
 
 export class Game {
-  constructor(rows, cols, cellWidth, mineCount) {
+  constructor(rows, cols, mineCount) {
     this._rows = rows;
     this._cols = cols;
-    this._cellWidth = cellWidth;
+    this._cellWidth = 40;
     this._mineCount = mineCount;
     this._cells = [];
   }
