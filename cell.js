@@ -2,8 +2,9 @@ function Cell(x, y, w, mine) {
     this.x = x;
     this.y = y;
     this.w = w;
-    this.revealed = false;
+    this.revealed = true;
     this.mine = mine;
+    this.minesAround = 0;
 }
 
 Cell.prototype.draw = function () {
@@ -11,16 +12,29 @@ Cell.prototype.draw = function () {
     this.revealed ? stroke(140) : stroke(200);
     rect(this.x, this.y, this.w, this.w);
 
-    if (this.revealed && this.mine) {
-        fill(200, 30, 40);
-        var half = this.w /2;
+    if (this.revealed) {
+        if (this.mine) {
+            fill(200, 30, 40);
+            var half = this.w /2;
 
-        ellipse(this.x + half, this.y + half, half, half);
+            ellipse(this.x + half, this.y + half, half, half);
+        } else if (this.minesAround) {
+            text(this.minesAround, this.x + this.w / 2, this.y + this.w / 2, this.w, this.w);
+        }
     }
 };
 
 Cell.prototype.reveal = function () {
     this.revealed = true;
+
+    return !this.mine;
 };
 
+Cell.prototype.setMinesAround = function (count) {
+    this.minesAround = count;
+};
+
+Cell.prototype.isMine = function () {
+    return this.mine;
+};
 

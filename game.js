@@ -5,7 +5,6 @@ var cells = [],
     w = 40;
 
 
-
 function setup() {
     createCanvas(601, 401);
     background(0, 0, 0);
@@ -26,9 +25,13 @@ function setup() {
 
     for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
-            cells.push(new Cell(j * w, i * w, w, randomNumbers.indexOf(i*cols + j) > -1));
+            cells.push(new Cell(j * w, i * w, w, randomNumbers.indexOf(i * cols + j) > -1));
         }
     }
+
+    cells.forEach(function (cell) {
+        cell.setMinesAround(countMinesAround(cell));
+    });
 }
 
 
@@ -44,11 +47,69 @@ function mouseClicked() {
     var rowI = (mouseY - (mouseY % w)) / w;
     var colI = (mouseX - (mouseX % w)) / w;
 
-    if (rowI >= rows || colI >= cols) {
+    var cell = getCell(rowI, colI);
+
+    if (!cell) {
         return;
     }
 
-    var cell = cells[cols * rowI + colI];
-    cell.reveal();
+    fullReveal(cell);
+}
+
+function getCell(rowI, colI) {
+    if (rowI >= rows || colI >= cols) {
+        return null;
+    }
+
+    return cells[cols * rowI + colI];
+}
+
+function countMinesAround(cell) {
+    return getNeighbours(cell).reduce(function (count, cell) {
+        var number = cell.isMine() ? 1 : 0;
+        return number + count;
+    }, 0)
+}
+
+function fullReveal(cell) {
+
+    if (!cell.reveal()) {
+        return gameOver();
+    }
+
+    getNeighbours(cell).forEach(function (c) {
+        // if (countMinesAround(c)) {
+        //
+        // }
+    });
+}
+
+function getNeighbours(cell) {
+    var neighbours = [];
+
+    for (var rowDelta = -1; rowDelta < 2; rowDelta++) {
+        var row = rowDelta + (cell.y / cell.w);
+        if (row < 0 || row >= rows) {
+            continue;
+        }
+        for (var colDelta = -1; colDelta < 2; colDelta++) {
+            var col = colDelta + (cell.x / cell.w);
+            if (col < 0 || col >= cols || (rowDelta === 0 && colDelta === 0)) {
+                continue;
+            }
+
+            neighbours.push(getCell(row, col));
+        }
+    }
+
+    return neighbours;
+}
+
+
+function gameOver() {
+    console.log('Game over');
+    cells.forEach(function (cell) {
+        cell.reveal();
+    });
 }
 
