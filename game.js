@@ -10,22 +10,11 @@ function setup() {
     createCanvas(601, 401);
     background(0, 0, 0);
 
-    var incrementingArray = [];
-    for (var y = 0; y < rows; y++) {
-        for (var z = 0; z < cols; z++) {
-            incrementingArray.push(y * cols + z);
-        }
-    }
-
-
-    //noinspection JSUnresolvedFunction
-    var randomNumbers = shuffle(incrementingArray);
-
-    randomNumbers.splice(mineCount);
+    var mineLocations = makeMineLocations(rows, cols, mineCount);
 
     for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
-            cells.push(new Cell(j * w, i * w, w, randomNumbers.indexOf(i * cols + j) > -1));
+            cells.push(new Cell(j * w, i * w, w, mineLocations.indexOf(getIndex(i, j)) > -1));
         }
     }
 
@@ -36,6 +25,21 @@ function setup() {
     cells.forEach(function (cell) {
         cell.setNeighbours(getNeighbours(cell));
     });
+}
+
+function makeMineLocations(rows, cols, howMany) {
+
+  var incrementingArray = [];
+  for (var nr = 0; nr < rows * cols; nr++) {
+      incrementingArray.push(nr);
+  }
+
+  //noinspection JSUnresolvedFunction
+  var randomNumbers = shuffle(incrementingArray);
+
+  randomNumbers.splice(howMany);
+
+  return randomNumbers;
 }
 
 
@@ -62,13 +66,23 @@ function mouseClicked() {
     fullReveal(cell);
 }
 
+function getIndex(row, col) {
+  if (row >= rows || col >= cols) {
+    return null;
+  }
+
+  return cols * row + col;
+}
+
 function getCell(row, col) {
 
-    if (row >= rows || col >= cols) {
+    var index = getIndex(row, col);
+
+    if (index === null) {
         return null;
     }
 
-    return cells[cols * row + col];
+    return cells[index];
 }
 
 function countMinesAround(cell) {
