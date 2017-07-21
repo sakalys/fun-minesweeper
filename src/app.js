@@ -2,9 +2,15 @@ import {Game} from "./game";
 
 let game;
 
-window.setup = function () {
+function newGame() {
   game = new Game(10, 15, 20);
   game.start();
+}
+
+window.newGame = newGame;
+
+window.setup = function () {
+  newGame();
 };
 
 

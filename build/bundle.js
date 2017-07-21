@@ -74,9 +74,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 let game;
 
-window.setup = function () {
+function newGame() {
   game = new __WEBPACK_IMPORTED_MODULE_0__game__["a" /* Game */](10, 15, 20);
   game.start();
+}
+
+window.newGame = newGame;
+
+window.setup = function () {
+  newGame();
 };
 
 window.draw = function () {
