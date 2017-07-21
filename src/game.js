@@ -1,152 +1,177 @@
 var Cell = require('./cell');
 
-var cells = [],
-    rows = 10,
-    cols = 15,
-    mineCount = 20,
-    w = 40;
+module.exports = Game;
 
-window.setup = function() {
-    //noinspection JSUnresolvedFunction
-    createCanvas(601, 401);
-    background(0, 0, 0);
+function Game(rows, cols, cellWidth, mineCount) {
+  this._rows = rows;
+  this._cols = cols;
+  this._cellWidth = cellWidth;
+  this._mineCount = mineCount;
+  this._cells = [];
+}
 
-    var mineLocations = makeMineLocations(rows, cols, mineCount);
-
-    for (var i = 0; i < rows; i++) {
-        for (var j = 0; j < cols; j++) {
-            cells.push(new Cell(j * w, i * w, w, mineLocations.indexOf(getIndex(i, j)) > -1));
-        }
-    }
-
-    cells.forEach(function (cell) {
-        cell.setMinesAround(countMinesAround(cell));
-    });
-
-    cells.forEach(function (cell) {
-        cell.setNeighbours(getNeighbours(cell));
-    });
-};
-
-function makeMineLocations(rows, cols, howMany) {
-
-  var incrementingArray = [];
-  for (var nr = 0; nr < rows * cols; nr++) {
-      incrementingArray.push(nr);
-  }
+Game.prototype.start = function () {
+  var _this = this;
 
   //noinspection JSUnresolvedFunction
-  var randomNumbers = shuffle(incrementingArray);
+  createCanvas(601, 401);
+  background(0, 0, 0);
 
-  randomNumbers.splice(howMany);
+  var mineLocations = this._makeMineLocations(),
+    w = this.getCellWidth();
 
-  return randomNumbers;
-}
+  for (var i = 0; i < this.getRowCount(); i++) {
+    for (var j = 0; j < this.getColCount(); j++) {
+      this._cells.push(new Cell(j * w, i * w, w, mineLocations.indexOf(this._getIndex(i, j)) > -1));
+    }
+  }
 
+  this._cells.forEach(function (cell) {
+    cell.setMinesAround(_this._countMinesAround(cell));
+  });
 
-window.draw = function() {
+  this._cells.forEach(function (cell) {
+    cell.setNeighbours(_this._getNeighbours(cell));
+  });
+};
 
-    cells.forEach(function (cell) {
-        cell.draw();
-    });
+Game.prototype._getNeighbours = function (cell) {
+  var neighbours = [];
+
+  for (var rowDelta = -1; rowDelta < 2; rowDelta++) {
+    var row = rowDelta + (cell.y / cell.w);
+    if (row < 0 || row >= this.getRowCount()) {
+      continue;
+    }
+
+    for (var colDelta = -1; colDelta < 2; colDelta++) {
+      var col = colDelta + (cell.x / cell.w);
+      if (col < 0 || col >= this.getColCount() || (rowDelta === 0 && colDelta === 0)) {
+        continue;
+      }
+
+      neighbours.push(this._getCell(row, col));
+    }
+  }
+
+  return neighbours;
 
 };
 
-window.mouseClicked = function() {
-    //noinspection JSUnresolvedVariable
-    var row = (mouseY - (mouseY % w)) / w;
-    //noinspection JSUnresolvedVariable
-    var col = (mouseX - (mouseX % w)) / w;
+Game.prototype._countMinesAround = function (cell) {
+  return this._getNeighbours(cell).reduce(function (count, cell) {
+    var number = cell.isMine() ? 1 : 0;
+    return number + count;
+  }, 0);
 
-    var cell = getCell(row, col);
+};
 
-    if (!cell) {
-        return;
-    }
+Game.prototype._getCell = function (row, col) {
+  var index = this._getIndex(row, col);
 
-    fullReveal(cell);
-}
+  if (index === null) {
+    return null;
+  }
 
-function getIndex(row, col) {
+  return this._cells[index];
+};
+
+
+Game.prototype._getIndex = function (row, col) {
+  var rows = this.getRowCount(),
+    cols = this.getColCount();
+
   if (row >= rows || col >= cols) {
     return null;
   }
 
   return cols * row + col;
-}
+};
 
-function getCell(row, col) {
+Game.prototype.getRowCount = function () {
+  return this._rows;
+};
 
-    var index = getIndex(row, col);
+Game.prototype.getColCount = function () {
+  return this._cols;
+};
 
-    if (index === null) {
-        return null;
+Game.prototype.getCellWidth = function () {
+  return this._cellWidth;
+};
+
+Game.prototype.getMineCount = function () {
+  return this._mineCount
+};
+
+Game.prototype._makeMineLocations = function () {
+
+  var incrementingArray = [];
+  for (var nr = 0; nr < this.getRowCount() * this.getColCount(); nr++) {
+    incrementingArray.push(nr);
+  }
+
+  //noinspection JSUnresolvedFunction
+  var randomNumbers = shuffle(incrementingArray);
+
+  randomNumbers.splice(this.getMineCount());
+
+  return randomNumbers;
+};
+
+Game.prototype.draw = function () {
+  this._cells.forEach(function (cell) {
+    cell.draw();
+  });
+};
+
+Game.prototype.gameOver = function () {
+  console.log('Game over');
+  this._cells.forEach(function (cell) {
+    cell.reveal();
+  });
+};
+
+Game.prototype.handleClick = function (x, y) {
+
+  var w = this.getCellWidth();
+
+  var row = (y - (y % w)) / w,
+    col = (x - (x % w)) / w;
+
+  var cell = this._getCell(row, col);
+
+  if (!cell) {
+    return;
+  }
+
+  this._fullReveal(cell);
+};
+
+Game.prototype._fullReveal = function (cell) {
+
+  var _this = this;
+
+  if (cell.revealed) {
+    return;
+  }
+
+  if (!cell.reveal()) {
+    return this.gameOver();
+  }
+
+  if (cell.minesAround) {
+    return;
+  }
+  var arr = cell.getNeighbours();
+
+  arr.forEach(function (c) {
+    if (!c.revealed) {
+      if (!c.minesAround) {
+        _this._fullReveal(c);
+      } else if (c.minesAround) {
+        c.reveal();
+      }
     }
-
-    return cells[index];
-}
-
-function countMinesAround(cell) {
-
-    return getNeighbours(cell).reduce(function (count, cell) {
-        var number = cell.isMine() ? 1 : 0;
-        return number + count;
-    }, 0)
-
-}
-
-function fullReveal(cell) {
-
-    if (cell.revealed) {
-        return;
-    }
-
-    if (!cell.reveal()) {
-        return gameOver();
-    }
-
-    if (cell.minesAround) {
-        return;
-    }
-    var arr = cell.getNeighbours();
-
-    arr.forEach(function (c) {
-        if (!c.revealed) {
-            if (!c.minesAround) {
-                fullReveal(c);
-            } else if (c.minesAround) {
-                c.reveal();
-            }
-        }
-    });
-}
-
-function getNeighbours(cell) {
-    var neighbours = [];
-
-    for (var rowDelta = -1; rowDelta < 2; rowDelta++) {
-        var row = rowDelta + (cell.y / cell.w);
-        if (row < 0 || row >= rows) {
-            continue;
-        }
-        for (var colDelta = -1; colDelta < 2; colDelta++) {
-            var col = colDelta + (cell.x / cell.w);
-            if (col < 0 || col >= cols || (rowDelta === 0 && colDelta === 0)) {
-                continue;
-            }
-
-            neighbours.push(getCell(row, col));
-        }
-    }
-
-    return neighbours;
-}
-
-
-function gameOver() {
-    console.log('Game over');
-    cells.forEach(function (cell) {
-        cell.reveal();
-    });
-}
-
+  });
+};
