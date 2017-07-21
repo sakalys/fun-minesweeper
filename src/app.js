@@ -1,14 +1,9 @@
-var Game = require('./game');
+import {Game} from "./game";
 
-var game,
-  rows = 10,
-  cols = 15,
-  mineCount = 20,
-  w = 40;
-
+let game;
 
 window.setup = function () {
-  game = new Game(rows, cols, w, mineCount);
+  game = new Game(10, 15, 40, 20);
   game.start();
 };
 
