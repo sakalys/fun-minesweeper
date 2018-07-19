@@ -184,24 +184,24 @@ export class Game {
 
     if (flag) {
       if (this.isStarted()) {
-        const minesLeft = this._flag(cell);
-        this._updateScore(minesLeft);
+        this._flag(cell);
       }
     } else {
       if (!cell.isFlagged()) {
         this._fullReveal(cell);
       }
     }
+
+    this._updateScore(this._countMinesLeft());
   }
 
   // noinspection JSMethodCanBeStatic
   _flag(cell) {
     if (cell.isRevealed()) {
-      return this._countMinesLeft();
+      return;
     }
 
     cell.toggleFlag();
-    return this._countMinesLeft();
   }
 
   _fullReveal(cell) {
@@ -253,5 +253,29 @@ export class Game {
     if (this._minesUpdateCb) {
       this._minesUpdateCb(minesLeft);
     }
+
+    if (minesLeft === 0 || this._allCleared()) {
+      if (this._onWon) {
+        this._onWon();
+      }
+    }
+  }
+
+  _allCleared() {
+    const countReveled = this._cells.reduce((a, cell) => {
+      return a + ((cell.isRevealed() && !cell.isMine()) ? 1 : 0);
+    }, 0);
+
+    const nonMinedCount = (this._cells.length - this._mineCount);
+
+    return countReveled === nonMinedCount;
+  }
+
+  onWon(cb) {
+    this._onWon = cb;
+  }
+
+  onLose(cb) {
+    this._onLose = cb;
   }
 }

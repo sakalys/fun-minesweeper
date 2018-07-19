@@ -7,37 +7,85 @@ export class GameComponent extends React.Component {
   constructor() {
     super();
     this.p = null;
-    this.state = {
+    this.state = this.getInitialState();
+  }
+
+  getInitialState() {
+    return {
       minesLeft: 0,
-    }
+      newGame: true,
+      gameRunning: false,
+      gameWon: false,
+      gameLost: false,
+    };
   }
 
   componentDidMount() {
-    const comp = this;
+    this.restartGame();
+  }
 
-    function sketch(p) {
-      comp.p = p;
+  restartGame = () => {
+    this.setState({newGame: true, gameRunning: false});
 
-      p.setup = comp.setup;
+    this.game = new Game(10, 15, 4);
+  };
 
-      p.draw = () => {
-        comp.game.draw();
-      };
+  componentDidUpdate() {
+    if (this.state.newGame) {
+      this.setState({
+        newGame: false,
+        gameWon: false,
+        gameLost: false,
+        gameRunning: true,
+        justStarted: true,
+      })
+    } else if (this.state.justStarted) {
+      const canvasContainer = document.getElementById('canvas-container');
+      if (!canvasContainer) {
+        throw new Error("Canvas container not found");
+      }
+      const comp = this;
+
+      function sketch(p) {
+        comp.p = p;
+
+        p.setup = comp.setup;
+
+        p.draw = () => {
+          comp.game.draw();
+        };
 
 
-      p.mouseClicked = comp.mouseClicked;
+        p.mouseClicked = comp.mouseClicked;
+      }
+
+      new p5(sketch, canvasContainer);
+      this.setState({justStarted: false})
     }
-
-    new p5(sketch, document.getElementById('canvas-container'));
   }
 
   render() {
     return (
-      <div class="game">
+      <div className="game">
         <h1>Minesweeper</h1>
-        <p>Mines left: {this.state.minesLeft}</p>
-        <div id="canvas-container"></div>
-        <p><code>Ctrl+Click</code> <code>(Cmd+Click)</code> to flag a square.</p>
+
+        {!this.state.gameRunning && (
+          this.state.gameWon && (
+            <div>
+              <h2>You won, schmuk!</h2>
+              <button onClick={this.restartGame}>Restart</button>
+            </div>
+          )
+        )}
+
+        {this.state.gameRunning && (
+          <div>
+            <p>Mines left: {this.state.minesLeft}</p>
+            <div id="canvas-container"></div>
+            <p><code>Ctrl+Click</code> <code>(Cmd+Click)</code> to flag a square.</p>
+          </div>
+        )}
+
       </div>
     )
   }
@@ -45,7 +93,6 @@ export class GameComponent extends React.Component {
 
   setup = () => {
     const p = this.p;
-    this.game = new Game(10, 15, 30);
 
     this.game.onUpdateMinesLeft((count) => {
       this.setState({
@@ -53,10 +100,24 @@ export class GameComponent extends React.Component {
       });
     });
 
+    this.game.onWon(() => {
+      console.log("Game won");
+      this.setState({
+        gameWon: true,
+        gameRunning: false,
+      })
+    });
+
+    this.game.onLose(() => {
+
+    });
+
     this.game.boot(p);
   };
 
   mouseClicked = (e) => {
+    console.log(this.state);
+
     //noinspection JSUnresolvedVariable
     const flag = e.ctrlKey || e.metaKey;
     this.game.handleClick(this.p.mouseX, this.p.mouseY, flag);
