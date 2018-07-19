@@ -5,6 +5,7 @@ export class Cell {
     this._y = y;
     this._w = w;
     this._mined = false;
+    this._flaged = false;
     this._revealed = false;
     this._minesAround = 0;
   }
@@ -21,24 +22,29 @@ export class Cell {
     return this._y;
   }
 
-  draw() {
-    fill(this._revealed ? 215 : 245);
-    this._revealed ? stroke(140) : stroke(200);
-    rect(this._x, this._y, this._w, this._w);
+  draw(p) {
+    p.fill(this._revealed ? 215 : 245);
+    this._revealed ? p.stroke(140) : p.stroke(200);
+    p.rect(this._x, this._y, this._w, this._w);
 
-    if (this._revealed) {
+    if (this._flaged) {
+      p.textAlign(p.CENTER);
+      p.fill(240, 40, 90);
+      p.textSize(30);
+      p.text('F', this._x + 5, this._y + this._w / 2 - 16, this._w, this._w);
+    } else if (this._revealed) {
 
       if (this._mined) {
-        fill(200, 30, 40);
+        p.fill(200, 30, 40);
         let half = this._w / 2;
 
-        ellipse(this._x + half, this._y + half, half, half);
+        p.ellipse(this._x + half, this._y + half, half, half);
 
       } else if (this._minesAround) {
-        textAlign(CENTER);
-        fill(100, 90, 190);
-        textSize(20);
-        text(this._minesAround, this._x + 3, this._y + this._w / 2 - 11, this._w, this._w);
+        p.textAlign(p.CENTER);
+        p.fill(100, 90, 190);
+        p.textSize(20);
+        p.text(this._minesAround, this._x + 3, this._y + this._w / 2 - 11, this._w, this._w);
       }
 
     }
@@ -58,6 +64,7 @@ export class Cell {
 
   reveal() {
     this._revealed = true;
+    this._flaged = false;
 
     return !this._mined;
   }
@@ -72,6 +79,14 @@ export class Cell {
 
   isMine() {
     return this._mined;
+  }
+
+  toggleFlag() {
+    this._flaged = !this._flaged;
+  }
+
+  isFlagged() {
+    return this._flaged;
   }
 }
 

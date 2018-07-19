@@ -1,4 +1,4 @@
-import {Cell} from "./cell";
+import { Cell } from "./cell";
 
 export class Game {
   constructor(rows, cols, mineCount) {
@@ -9,6 +9,8 @@ export class Game {
     this._cellWidth = 40;
     this._cells = [];
     this._isStarted = false;
+
+    this._minesUpdateCb = null;
   }
 
   _firstCellClicked(cell) {
@@ -23,11 +25,12 @@ export class Game {
     });
   }
 
-  boot() {
+  boot(p) {
+    this.p = p;
 
     //noinspection JSUnresolvedFunction
-    createCanvas(601, 401);
-    background(0, 0, 0);
+    p.createCanvas(601, 401);
+    p.background(0, 0, 0);
 
     const w = this.getCellWidth();
 
@@ -40,6 +43,8 @@ export class Game {
     this._cells.forEach((cell) => {
       cell.setNeighbours(this._findNeighbours(cell));
     });
+
+    this._updateScore(this._mineCount);
   }
 
   /**
@@ -141,7 +146,7 @@ export class Game {
     });
 
     //noinspection JSUnresolvedFunction
-    const randomNumbers = shuffle(incrementingArray);
+    const randomNumbers = this.p.shuffle(incrementingArray);
 
     randomNumbers.splice(this.getMineCount());
 
@@ -149,8 +154,8 @@ export class Game {
   }
 
   draw() {
-    this._cells.forEach(function (cell) {
-      cell.draw();
+    this._cells.forEach((cell) => {
+      cell.draw(this.p);
     });
   }
 
@@ -161,7 +166,7 @@ export class Game {
     });
   }
 
-  handleClick(x, y) {
+  handleClick(x, y, flag) {
 
     const w = this.getCellWidth(),
       row = (y - (y % w)) / w,
@@ -177,7 +182,26 @@ export class Game {
       this._isStarted = true;
     }
 
-    this._fullReveal(cell);
+    if (flag) {
+      if (this.isStarted()) {
+        const minesLeft = this._flag(cell);
+        this._updateScore(minesLeft);
+      }
+    } else {
+      if (!cell.isFlagged()) {
+        this._fullReveal(cell);
+      }
+    }
+  }
+
+  // noinspection JSMethodCanBeStatic
+  _flag(cell) {
+    if (cell.isRevealed()) {
+      return this._countMinesLeft();
+    }
+
+    cell.toggleFlag();
+    return this._countMinesLeft();
   }
 
   _fullReveal(cell) {
@@ -197,7 +221,6 @@ export class Game {
     const arr = cell.getNeighbours();
 
 
-
     arr.forEach((c) => {
 
       if (!c.isRevealed()) {
@@ -212,5 +235,23 @@ export class Game {
       }
 
     });
+  }
+
+  _countMinesLeft() {
+    const flaggedCount = this._cells.reduce((acc, cell) => {
+      return acc + (cell.isFlagged() ? 1 : 0)
+    }, 0);
+
+    return this._mineCount - flaggedCount;
+  }
+
+  onUpdateMinesLeft(cb) {
+    this._minesUpdateCb = cb;
+  }
+
+  _updateScore(minesLeft) {
+    if (this._minesUpdateCb) {
+      this._minesUpdateCb(minesLeft);
+    }
   }
 }

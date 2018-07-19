@@ -1,27 +1,6 @@
+import React from "react";
+import ReactDOM from "react-dom";
 import {Game} from "./game";
+import {GameComponent} from "./game.component";
 
-let game;
-
-function newGame() {
-  game = new Game(10, 15, 30);
-  game.boot();
-}
-
-window.newGame = newGame;
-
-window.setup = function () {
-  newGame();
-};
-
-
-window.draw = function () {
-  game.draw();
-};
-
-window.mouseClicked = function () {
-  //noinspection JSUnresolvedVariable
-  game.handleClick(mouseX, mouseY);
-};
-
-
-
+ReactDOM.render(<GameComponent />, document.getElementById("root"));
