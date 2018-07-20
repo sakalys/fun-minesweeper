@@ -27,11 +27,17 @@ export class GameComponent extends React.Component {
   restartGame = () => {
     this.setState({newGame: true, gameRunning: false});
 
-    this.game = new Game(10, 15, 4);
+    this.game = new Game(10, 15, 3);
   };
 
   componentDidUpdate() {
     if (this.state.newGame) {
+
+      if (this.p5Instance) {
+        this.p5Instance.remove();
+        this.p5Instance = null;
+      }
+
       this.setState({
         newGame: false,
         gameWon: false,
@@ -54,7 +60,7 @@ export class GameComponent extends React.Component {
         p.mouseClicked = comp.mouseClicked;
       }
 
-      new p5(sketch, canvasContainer);
+      this.p5Instance = new p5(sketch, canvasContainer);
       this.setState({justStarted: false})
     }
   }
@@ -64,22 +70,41 @@ export class GameComponent extends React.Component {
       <div className="game">
         <h1>Minesweeper</h1>
 
-        {!this.state.gameRunning && (
-          this.state.gameWon && (
-            <div>
-              <h2>You won, schmuk!</h2>
-              <button onClick={this.restartGame}>Restart</button>
-            </div>
-          )
-        )}
-
-        {this.state.gameRunning && (
-          <div>
-            <p>Mines left: {this.state.minesLeft}</p>
+        <div>
+          <p>Mines left: {this.state.minesLeft}</p>
+          <div className="canvas-wrapper" style={{position: "relative", width: Game.CANVAS_WIDTH, margin: "auto"}}>
             <div id="canvas-container"></div>
-            <p><code>Ctrl+Click</code> <code>(Cmd+Click)</code> to flag a square.</p>
+
+            {!this.state.gameRunning && (
+
+              <div className="overlay" style={{position: "absolute", left: 0, right: 0, bottom: 0, top: 0}}>
+                <div className="game-finished-dash">
+
+                  {this.state.gameLost && (
+                    <div>
+                      <h2>Haha, you lost...</h2>
+                      <p>
+                        <button onClick={this.restartGame}>Restart</button>
+                      </p>
+                    </div>
+                  )}
+
+                  {this.state.gameWon && (
+                    <div>
+                      <h2>You won, schmuk!</h2>
+                      <p>
+                        <button onClick={this.restartGame}>Restart</button>
+                      </p>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            )}
+
           </div>
-        )}
+          <p><code>Ctrl+Click</code> <code>(Cmd+Click)</code> to flag a square.</p>
+        </div>
 
       </div>
     )
@@ -103,8 +128,11 @@ export class GameComponent extends React.Component {
       })
     });
 
-    this.game.onLose(() => {
-
+    this.game.onLost(() => {
+      this.setState({
+        gameLost: true,
+        gameRunning: false,
+      })
     });
 
     this.game.boot(p);
@@ -112,12 +140,14 @@ export class GameComponent extends React.Component {
 
   mouseClicked = (e) => {
     if (e.target.id !== "defaultCanvas0") {
-      return;
+      return true;
     }
 
     const modifiedClick = e.ctrlKey || e.metaKey;
 
     this.game.handleClick(this.p.mouseX, this.p.mouseY, modifiedClick);
+
+    return false;
   }
 
 }

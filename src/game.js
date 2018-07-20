@@ -5,6 +5,7 @@ export class Game {
   static CANVAS_HEIGHT = 401;
 
   constructor(rows, cols, mineCount) {
+    this._lost = false;
     this._rows = rows;
     this._cols = cols;
     this._mineCount = mineCount;
@@ -47,7 +48,7 @@ export class Game {
       cell.setNeighbours(this._findNeighbours(cell));
     });
 
-    this._updateScore(this._mineCount);
+    this._updateScore();
   }
 
   /**
@@ -160,10 +161,11 @@ export class Game {
     this._cells.forEach((cell) => {
       cell.draw(this.p);
     });
-  }
+  };
 
   gameOver() {
     console.log('Game over');
+    this._lost = true;
     this._cells.forEach(function (cell) {
       cell.reveal();
     });
@@ -199,8 +201,18 @@ export class Game {
       }
     }
 
-    this._updateScore(this._countMinesLeft());
-  }
+    this._updateScore();
+
+    if (this._lost) {
+      if (this._onLost) {
+        this._onLost();
+      }
+    } else if (this._allCleared()){
+      if (this._onWon) {
+        this._onWon();
+      }
+    }
+  };
 
   // noinspection JSMethodCanBeStatic
   _flag(cell) {
@@ -218,7 +230,8 @@ export class Game {
     }
 
     if (!cell.reveal()) {
-      return this.gameOver();
+      this.gameOver();
+      return;
     }
 
     if (cell.getMinesAroundCount()) {
@@ -256,15 +269,9 @@ export class Game {
     this._minesUpdateCb = cb;
   }
 
-  _updateScore(minesLeft) {
+  _updateScore() {
     if (this._minesUpdateCb) {
-      this._minesUpdateCb(minesLeft);
-    }
-
-    if (minesLeft === 0 || this._allCleared()) {
-      if (this._onWon) {
-        this._onWon();
-      }
+      this._minesUpdateCb(this._countMinesLeft());
     }
   }
 
@@ -282,7 +289,7 @@ export class Game {
     this._onWon = cb;
   }
 
-  onLose(cb) {
-    this._onLose = cb;
+  onLost(cb) {
+    this._onLost = cb;
   }
 }

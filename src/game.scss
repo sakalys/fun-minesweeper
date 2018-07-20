@@ -4,4 +4,32 @@ body {
 
 .game {
   text-align: center;
+
+  .canvas-wrapper {
+
+    .overlay {
+      background-color: rgba(0,0,0, .3);
+    }
+
+
+    .game-finished-dash {
+      margin-top: 20px;
+      font-size: 3em;
+      color: white;
+      font-weight: bold;
+
+      button {
+        font-size: 1em;
+        padding: 1rem 2rem;
+        background-color: #428cff;
+        color: white;
+        border: 0;
+        border-radius: 20px;
+
+        &:hover {
+          background-color: darken(#428cff, 20);
+        }
+      }
+    }
+  }
 }
