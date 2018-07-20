@@ -1,6 +1,9 @@
 import { Cell } from "./cell";
 
 export class Game {
+  static CANVAS_WIDTH = 601;
+  static CANVAS_HEIGHT = 401;
+
   constructor(rows, cols, mineCount) {
     this._rows = rows;
     this._cols = cols;
@@ -29,7 +32,7 @@ export class Game {
     this.p = p;
 
     //noinspection JSUnresolvedFunction
-    p.createCanvas(601, 401);
+    p.createCanvas(Game.CANVAS_WIDTH, Game.CANVAS_HEIGHT);
     p.background(0, 0, 0);
 
     const w = this.getCellWidth();
@@ -153,7 +156,7 @@ export class Game {
     return randomNumbers;
   }
 
-  draw() {
+  draw = () => {
     this._cells.forEach((cell) => {
       cell.draw(this.p);
     });
@@ -166,7 +169,11 @@ export class Game {
     });
   }
 
-  handleClick(x, y, flag) {
+  handleClick = (x, y, flag) => {
+
+    if (x < 0 || x > Game.CANVAS_WIDTH || y < 0 || y > Game.CANVAS_HEIGHT) {
+      return;
+    }
 
     const w = this.getCellWidth(),
       row = (y - (y % w)) / w,

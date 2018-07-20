@@ -50,12 +50,7 @@ export class GameComponent extends React.Component {
         comp.p = p;
 
         p.setup = comp.setup;
-
-        p.draw = () => {
-          comp.game.draw();
-        };
-
-
+        p.draw = comp.game.draw;
         p.mouseClicked = comp.mouseClicked;
       }
 
@@ -116,13 +111,13 @@ export class GameComponent extends React.Component {
   };
 
   mouseClicked = (e) => {
-    console.log(this.state);
+    if (e.target.id !== "defaultCanvas0") {
+      return;
+    }
 
-    //noinspection JSUnresolvedVariable
-    const flag = e.ctrlKey || e.metaKey;
-    this.game.handleClick(this.p.mouseX, this.p.mouseY, flag);
+    const modifiedClick = e.ctrlKey || e.metaKey;
 
-    return false;
+    this.game.handleClick(this.p.mouseX, this.p.mouseY, modifiedClick);
   }
 
 }
