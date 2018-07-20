@@ -27,7 +27,7 @@ export class GameComponent extends React.Component {
   restartGame = () => {
     this.setState({newGame: true, gameRunning: false});
 
-    this.game = new Game(10, 15, 3);
+    this.game = new Game(10, 15, 30);
   };
 
   componentDidUpdate() {
